@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Share Photo CRUD</title>
+  <style>
+    input[type='submit'], button, [aria-label]{
+      cursor: pointer;
+    }
+    #spoiler{
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<form action="javascript:void(0);" method="POST" onsubmit="app.Add()"> 
+  <input type="text" id="add-name" placeholder="New user">
+  <input type="submit" value="Add">
+  <input type='file' />
+<br><img id="myImg" src="#" alt="your image" height=200 width=100>
+</form>
+
+<div id="spoiler" role="aria-hidden">
+  <form action="javascript:void(0);" method="POST" id="saveEdit">
+    <input type="text" id="edit-name">
+    <input type="submit" value="Edit" /> <a onclick="CloseInput()" aria-label="Close">&#10006;</a>
+  </form>
+</div>
+
+<p id="counter"></p>
+
+<table>
+  <tr>
+    <th>Name</th>
+  </tr>
+    <tbody id="username">
+    </tbody>
+</table>
+
+<script>
+window.addEventListener('load', function() {
+  document.querySelector('input[type="file"]').addEventListener('change', function() {
+      if (this.files && this.files[0]) {
+          var img = document.querySelector('img');  // $('img')[0]
+          img.src = URL.createObjectURL(this.files[0]); // set src to file url
+          img.onload = imageIsLoaded; // optional onload event listener
+      }
+  });
+});
+
+function imageIsLoaded(e) { alert(e); }
+
+var app = new function() {
+  this.el = document.getElementById('username');
+  this.username = ['Name1', 'Name2', 'Name3', 'Name4'];
+  this.Count = function(data) {
+    var el   = document.getElementById('counter');
+    var name = 'pengguna';
+    if (data) {
+      if (data > 1) {
+        name = 'username';
+      }
+      el.innerHTML = data + ' ' + name ;
+    } else {
+      el.innerHTML = 'No ' + name;
+    }
+  };
+  
+  this.FetchAll = function() {
+    var data = '';
+    if (this.username.length > 0) {
+      for (i = 0; i < this.username.length; i++) {
+        data += '<tr>';
+        data += '<td>' + this.username[i] + '</td>';
+        data += '<td><button onclick="app.Edit(' + i + ')">Edit</button></td>';
+        data += '<td><button onclick="app.Delete(' + i + ')">Delete</button></td>';
+        data += '</tr>';
+      }
+    }
+    this.Count(this.username.length);
+    return this.el.innerHTML = data;
+  };
+  this.Add = function () {
+    el = document.getElementById('add-name');
+    // Get the value
+    var pengguna = el.value;
+    if (pengguna) {
+      // Add the new value
+      this.username.push(pengguna.trim());
+      // Reset input value
+      el.value = '';
+      // Dislay the new list
+      this.FetchAll();
+    }
+  };
+  this.Edit = function (item) {
+    var el = document.getElementById('edit-name');
+    // Display value in the field
+    el.value = this.username[item];
+    // Display fields
+    document.getElementById('spoiler').style.display = 'block';
+    self = this;
+    document.getElementById('saveEdit').onsubmit = function() {
+      // Get value
+      var pengguna = el.value;
+      if (pengguna) {
+        // Edit value
+        self.username.splice(item, 1, pengguna.trim());
+        // Display the new list
+        self.FetchAll();
+        // Hide fields
+        CloseInput();
+      }
+    }
+  };
+  this.Delete = function (item) {
+    // Delete the current row
+    this.username.splice(item, 1);
+    // Display the new list
+    this.FetchAll();
+  };
+  
+}
+app.FetchAll();
+function CloseInput() {
+  document.getElementById('spoiler').style.display = 'none';
+}
+</script>
+</body>
+</html>
